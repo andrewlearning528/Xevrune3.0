@@ -1,0 +1,448 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Xevrune — Intelligence</title>
+<style>
+:root{color-scheme:dark;--bg:#080b14;--panel:#111729;--panel2:#151e33;--line:#26314c;--text:#eef3ff;--muted:#9ca9c5;--accent:#8b7cff;--accent2:#49d9d0;--danger:#ff7c91}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 15% 0%,#1b2250 0,transparent 42%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:1080px;margin:auto;padding:22px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:15px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#080b14;font-weight:900;font-size:21px}
+.brand h1{font-size:22px;margin:0}
+.brand p{margin:0;color:var(--muted);font-size:12px;letter-spacing:2px;text-transform:uppercase}
+.pill{border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:var(--muted);font-size:12px}
+.layout{display:grid;grid-template-columns:260px 1fr;gap:16px}
+.panel{background:#101627ef;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 60px #0003;overflow:hidden}
+.side{padding:17px}
+.section-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:7px 0 10px}
+.field{width:100%;background:#090e1b;border:1px solid var(--line);border-radius:11px;color:var(--text);padding:11px 12px;font:inherit;outline:none}
+.field:focus{border-color:var(--accent)}
+.btn{border:0;border-radius:11px;padding:11px 14px;background:linear-gradient(110deg,var(--accent),#6a8bff);color:white;font-weight:700;cursor:pointer;font:inherit}
+.btn.secondary{background:#1a2339;border:1px solid var(--line);color:var(--text)}
+.btn:disabled{opacity:.5;cursor:wait}
+.stack{display:grid;gap:9px}
+.small{font-size:12px;color:var(--muted)}
+.notice{margin-top:12px;padding:10px;border-radius:10px;background:#161f35;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.chat{display:flex;flex-direction:column;min-height:690px}
+.chathead{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.chathead h2{font-size:16px;margin:0}
+.chathead p{font-size:12px;color:var(--muted);margin:2px 0 0}
+.messages{padding:20px;display:flex;flex-direction:column;gap:14px;flex:1;min-height:400px;max-height:58vh;overflow:auto}
+.msg{max-width:86%;padding:12px 14px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,#5c58c9,#4c70cb);border-bottom-right-radius:5px}
+.msg.ai{align-self:flex-start;background:var(--panel2);border:1px solid var(--line);border-bottom-left-radius:5px}
+.msg .who{font-size:10px;text-transform:uppercase;letter-spacing:1.3px;opacity:.7;margin-bottom:5px}
+.welcome{padding:18px;border:1px dashed #394666;border-radius:15px;color:var(--muted);text-align:center}
+.composer{padding:14px;border-top:1px solid var(--line);display:flex;gap:9px}
+.composer textarea{resize:vertical;min-height:48px;max-height:150px;flex:1}
+.foot{color:var(--muted);font-size:11px;text-align:center;padding:14px}
+.hide{display:none!important}
+.status{font-size:12px;color:var(--muted);min-height:18px;margin-top:4px}
+.memory-list{display:grid;gap:8px;margin-top:8px}
+.memory-item{font-size:12px;background:#0b1120;border:1px solid var(--line);border-radius:10px;padding:9px;overflow-wrap:anywhere}
+.sidehr{border:0;border-top:1px solid var(--line);margin:17px 0}
+@media(max-width:760px){.wrap{padding:12px}.layout{grid-template-columns:1fr}.side{order:2}.chat{min-height:70vh}.messages{max-height:none;min-height:300px}.top{align-items:flex-start}.pill{max-width:48%;overflow-wrap:anywhere}.msg{max-width:95%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand">
+    <div class="logo">X</div>
+    <div><h1>Xevrune</h1><p>Intelligence · Personal workspace</p></div>
+  </div>
+  <div id="accountPill" class="pill">Not signed in</div>
+</header>
+
+<div class="layout">
+<aside class="panel side">
+  <div id="authPanel">
+    <div class="section-title">Your account</div>
+    <p class="small">Sign in or create an account to use your own account space.</p>
+    <div class="stack">
+      <input id="email" class="field" type="email" autocomplete="email" placeholder="Email address">
+      <input id="password" class="field" type="password" autocomplete="current-password" placeholder="Password (6+ characters)">
+      <button id="signIn" class="btn">Sign in</button>
+      <button id="signUp" class="btn secondary">Create account</button>
+      <div id="authStatus" class="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div id="signedPanel" class="hide">
+    <div class="section-title">Your workspace</div>
+    <div class="small" id="signedEmail"></div>
+    <button id="signOut" class="btn secondary" style="width:100%;margin-top:10px">Sign out</button>
+  </div>
+
+  <hr class="sidehr">
+  <div class="section-title">Memory</div>
+  <p class="small">Save a detail you want Xevrune to remember. Account memory requires correctly configured database security.</p>
+  <div class="stack">
+    <input id="memoryInput" class="field" placeholder="e.g. I prefer short answers">
+    <button id="saveMemory" class="btn secondary">Save memory</button>
+    <button id="refreshMemory" class="btn secondary">Refresh memories</button>
+  </div>
+  <div id="memoryStatus" class="status" aria-live="polite"></div>
+  <div id="memoryList" class="memory-list"></div>
+
+  <hr class="sidehr">
+  <div class="section-title">Intelligence</div>
+  <div class="small">The optional in-browser language model downloads on first use and may be slow or unavailable on some devices.</div>
+  <button id="loadModel" class="btn secondary" style="width:100%;margin-top:10px">Activate intelligence</button>
+  <div id="modelStatus" class="status" aria-live="polite">Model not loaded.</div>
+
+  <div class="notice">Use only a Supabase publishable key in this public file. Never add a secret or service-role key. Configure row-level security before sharing the site.</div>
+</aside>
+
+<main class="panel chat">
+  <div class="chathead">
+    <div><h2>Chat with Xevrune</h2><p id="chatSubtitle">Your ideas, in one place.</p></div>
+    <button id="clearChat" class="btn secondary">Clear chat</button>
+  </div>
+  <div id="messages" class="messages">
+    <div class="welcome" id="welcome">Welcome to Xevrune. Sign in to connect your account, activate intelligence for model-powered replies, or ask a simple question to get started.</div>
+  </div>
+  <form id="composer" class="composer">
+    <textarea id="prompt" class="field" rows="2" placeholder="Message Xevrune…" aria-label="Message Xevrune"></textarea>
+    <button class="btn" id="send" type="submit">Send</button>
+  </form>
+  <div class="foot">Xevrune is an experimental project. Verify important information and avoid entering sensitive personal information.</div>
+</main>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+const SUPABASE_URL = "https://dgunuyhxbvsftxydzyps.supabase.co";
+const SUPABASE_KEY = "sb_publishable_fNahng6bY9wL_xKsZiT-Rg_p-p7UA9p";
+
+const $ = id => document.getElementById(id);
+let supabase = null;
+let currentUser = null;
+let model = null;
+let modelBusy = false;
+let messages = [];
+let memories = [];
+
+const localKey = () => `xevrune:${currentUser?.id || 'guest'}:chat`;
+const memoryLocalKey = () => `xevrune:${currentUser?.id || 'guest'}:memories`;
+
+function status(id,text,error=false){
+  $(id).textContent=text;
+  $(id).style.color=error?'var(--danger)':'var(--muted)';
+}
+
+function renderMessage(role,content){
+  $('welcome').classList.add('hide');
+  const el=document.createElement('div');
+  el.className=`msg ${role==='user'?'user':'ai'}`;
+  const who=document.createElement('div');
+  who.className='who';
+  who.textContent=role==='user'?'You':'Xevrune';
+  const body=document.createElement('div');
+  body.textContent=content;
+  el.append(who,body);
+  $('messages').append(el);
+  $('messages').scrollTop=$('messages').scrollHeight;
+}
+
+function addMessage(role,content,render=true){
+  messages.push({role,content});
+  if(render)renderMessage(role,content);
+}
+
+function redrawMessages(){
+  $('messages').innerHTML='';
+  const welcome=document.createElement('div');
+  welcome.id='welcome';
+  welcome.className='welcome'+(messages.length?' hide':'');
+  welcome.textContent='Welcome to Xevrune. Sign in to connect your account, activate intelligence for model-powered replies, or ask a simple question to get started.';
+  $('messages').append(welcome);
+  for(const m of messages)renderMessage(m.role,m.content);
+}
+
+function saveLocal(){
+  try{localStorage.setItem(localKey(),JSON.stringify(messages.slice(-100));}catch(e){}
+}
+function loadLocal(){
+  try{
+    const v=JSON.parse(localStorage.getItem(localKey())||'[]');
+    messages=Array.isArray(v)?v:[];
+  }catch{messages=[];}
+  redrawMessages();
+}
+function setUserUI(){
+  const signed=!!currentUser;
+  $('authPanel').classList.toggle('hide',signed);
+  $('signedPanel').classList.toggle('hide',!signed);
+  $('accountPill').textContent=signed?currentUser.email:'Guest mode';
+  $('signedEmail').textContent=signed?currentUser.email:'';
+  $('chatSubtitle').textContent=signed?'Signed in · account-specific workspace':'Guest mode · this browser only';
+}
+
+async function init(){
+  if(!window.supabase){
+    status('authStatus','Could not load the Supabase library. Check your internet connection.',true);
+    return;
+  }
+  supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const {data,error}=await supabase.auth.getSession();
+  if(error)status('authStatus',error.message,true);
+  currentUser=data?.session?.user||null;
+  setUserUI();
+  loadLocal();
+  if(currentUser){await loadCloudMessages();await loadMemories();}
+  supabase.auth.onAuthStateChange(async(_event,session)=>{
+    currentUser=session?.user||null;
+    setUserUI();
+    loadLocal();
+    if(currentUser){await loadCloudMessages();await loadMemories();}
+    else{memories=[];renderMemories();}
+  });
+}
+
+async function signIn(signUp){
+  const email=$('email').value.trim();
+  const password=$('password').value;
+  if(!email||!password){status('authStatus','Enter your email and password.',true);return;}
+  if(signUp&&password.length<6){status('authStatus','Use a password with at least 6 characters.',true);return;}
+  status('authStatus',signUp?'Creating account…':'Signing in…');
+  $('signIn').disabled=$('signUp').disabled=true;
+  try{
+    const result=signUp
+      ?await supabase.auth.signUp({email,password})
+      :await supabase.auth.signInWithPassword({email,password});
+    if(result.error)throw result.error;
+    if(signUp&&!result.data.session)
+      status('authStatus','Account created. Check your email for a confirmation link, then sign in.');
+    else status('authStatus',signUp?'Account created.':'Signed in.');
+  }catch(e){
+    status('authStatus',e.message||'Authentication failed.',true);
+  }finally{
+    $('signIn').disabled=$('signUp').disabled=false;
+  }
+}
+
+$('signIn').addEventListener('click',()=>signIn(false));
+$('signUp').addEventListener('click',()=>signIn(true));
+$('signOut').addEventListener('click',async()=>{
+  if(!supabase)return;
+  const {error}=await supabase.auth.signOut();
+  if(error)status('authStatus',error.message,true);
+  else{
+    currentUser=null;messages=[];memories=[];
+    setUserUI();loadLocal();renderMemories();
+  }
+});
+
+async function loadCloudMessages(){
+  if(!currentUser)return;
+  try{
+    const {data,error}=await supabase.from('chat_messages')
+      .select('role,content,created_at')
+      .eq('user_id',currentUser.id)
+      .order('created_at',{ascending:true}).limit(100);
+    if(error)throw error;
+    if(data?.length){
+      messages=data.filter(x=>['user','assistant'].includes(x.role))
+        .map(x=>({role:x.role==='assistant'?'ai':'user',content:x.content}));
+      saveLocal();redrawMessages();
+    }
+  }catch(e){
+    status('authStatus','Signed in, but cloud chat history could not load. Check the chat_messages table and its RLS policies.',true);
+  }
+}
+
+async function persistMessage(role,content){
+  saveLocal();
+  if(!currentUser)return;
+  try{
+    const {error}=await supabase.from('chat_messages').insert({
+      user_id:currentUser.id,
+      role:role==='ai'?'assistant':'user',
+      content
+    });
+    if(error)throw error;
+  }catch(e){
+    status('authStatus','Chat is saved in this browser, but cloud saving failed. Check chat_messages columns and RLS.',true);
+  }
+}
+
+async function loadMemories(){
+  if(!currentUser)return;
+  status('memoryStatus','Loading account memories…');
+  try{
+    const {data,error}=await supabase.from('memories')
+      .select('id,content,created_at')
+      .eq('user_id',currentUser.id)
+      .order('created_at',{ascending:false}).limit(30);
+    if(error)throw error;
+    memories=data||[];
+    renderMemories();
+    status('memoryStatus',`${memories.length} account memories loaded.`);
+  }catch(e){
+    status('memoryStatus','Cloud memories unavailable. Check the memories table columns and RLS policies.',true);
+    try{memories=JSON.parse(localStorage.getItem(memoryLocalKey())||'[]');}
+    catch{memories=[];}
+    renderMemories();
+  }
+}
+
+function renderMemories(){
+  const list=$('memoryList');
+  list.innerHTML='';
+  if(!memories.length){
+    const p=document.createElement('div');
+    p.className='small';
+    p.textContent='No saved memories yet.';
+    list.append(p);
+    return;
+  }
+  for(const m of memories){
+    const d=document.createElement('div');
+    d.className='memory-item';
+    d.textContent=m.content;
+    list.append(d);
+  }
+}
+
+$('saveMemory').addEventListener('click',async()=>{
+  const content=$('memoryInput').value.trim();
+  if(!content){status('memoryStatus','Type a memory first.',true);return;}
+  if(!currentUser){
+    try{memories=JSON.parse(localStorage.getItem(memoryLocalKey())||'[]');}
+    catch{memories=[];}
+    memories.unshift({id:crypto.randomUUID(),content,created_at:new Date().toISOString()});
+    memories=memories.slice(0,30);
+    localStorage.setItem(memoryLocalKey(),JSON.stringify(memories));
+    renderMemories();
+    $('memoryInput').value='';
+    status('memoryStatus','Saved in this browser only. Sign in for account cloud memory.');
+    return;
+  }
+  try{
+    const {error}=await supabase.from('memories').insert({user_id:currentUser.id,content});
+    if(error)throw error;
+    $('memoryInput').value='';
+    await loadMemories();
+  }catch(e){
+    status('memoryStatus','Could not save to cloud. Check the memories table columns and RLS policies.',true);
+  }
+});
+
+$('refreshMemory').addEventListener('click',()=>{
+  if(currentUser){loadMemories();return;}
+  try{memories=JSON.parse(localStorage.getItem(memoryLocalKey())||'[]');}
+  catch{memories=[];}
+  renderMemories();
+  status('memoryStatus','Showing this browser’s memories.');
+});
+
+async function activateModel(){
+  if(model||modelBusy)return;
+  modelBusy=true;
+  $('loadModel').disabled=true;
+  status('modelStatus','Downloading model files… This may take a while and uses browser memory.');
+  try{
+    const {pipeline,env}=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.2');
+    env.allowLocalModels=false;
+    model=await pipeline('text-generation','onnx-community/Qwen2.5-0.5B-Instruct',{dtype:'q4'});
+    status('modelStatus','Intelligence is ready in this browser.');
+    $('loadModel').textContent='Intelligence activated';
+  }catch(e){
+    status('modelStatus','The model could not load in this browser. Try again with a strong connection.',true);
+  }finally{
+    modelBusy=false;
+    $('loadModel').disabled=false;
+  }
+}
+$('loadModel').addEventListener('click',activateModel);
+
+function calc(text){
+  const m=text.match(/^(?:what is |calculate )?([\d\s()+\-*/%.]+)\??$/i);
+  if(!m)return null;
+  const expr=m[1].trim();
+  if(!expr||!/^[\d\s()+\-*/%.]+$/.test(expr))return null;
+  try{
+    const result=Function('"use strict";return ('+expr+')')();
+    return Number.isFinite(result)?String(result):null;
+  }catch{return null;}
+}
+
+function fallbackReply(text){
+  const t=text.toLowerCase().trim();
+  const c=calc(text);
+  if(c!==null)return `The result is ${c}.`;
+  if(/^(hi|hello|hey|yo)\b/.test(t))return 'Hello! I’m Xevrune. What would you like to explore?';
+  if(t.includes('your name'))return 'I’m Xevrune, your experimental AI workspace.';
+  if(t.includes('remember'))return 'Use the Memory panel to save a detail for this account.';
+  if(t.endsWith('?'))return 'I don’t have the language model loaded yet, so I can’t reliably answer open-ended questions. Select “Activate intelligence” to try loading it in your browser.';
+  return 'I’m ready to help. For more flexible responses, select “Activate intelligence” to load the optional browser model.';
+}
+
+async function answer(text){
+  if(model){
+    try{
+      const prompt=`You are Xevrune, a helpful, honest AI assistant. Answer clearly and do not claim capabilities you do not have.\nUser: ${text}\nAssistant:`;
+      const out=await model(prompt,{max_new_tokens:180,temperature:.7,do_sample:true});
+      const generated=out?.[0]?.generated_text||'';
+      const answer=generated.slice(generated.lastIndexOf('Assistant:')+10).trim();
+      if(answer)return answer;
+    }catch(e){
+      status('modelStatus','The model had trouble generating a reply. Try again.',true);
+    }
+  }
+  return fallbackReply(text);
+}
+
+$('composer').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const text=$('prompt').value.trim();
+  if(!text)return;
+  $('prompt').value='';
+  $('send').disabled=true;
+  addMessage('user',text);
+  await persistMessage('user',text);
+  const wait=document.createElement('div');
+  wait.className='msg ai';
+  wait.textContent='Thinking…';
+  $('messages').append(wait);
+  $('messages').scrollTop=$('messages').scrollHeight;
+  try{
+    const reply=await answer(text);
+    wait.remove();
+    addMessage('ai',reply);
+    await persistMessage('ai',reply);
+  }catch(e){
+    wait.remove();
+    addMessage('ai','Something went wrong. Please try again.');
+  }finally{
+    $('send').disabled=false;
+    $('prompt').focus();
+  }
+});
+
+$('clearChat').addEventListener('click',async()=>{
+  if(!confirm('Clear the visible chat and saved chat history for this account?'))return;
+  messages=[];
+  saveLocal();
+  redrawMessages();
+  if(currentUser){
+    try{
+      const {error}=await supabase.from('chat_messages').delete().eq('user_id',currentUser.id);
+      if(error)throw error;
+    }catch(e){
+      status('authStatus','Cleared locally, but cloud history could not be deleted. Check RLS.',true);
+    }
+  }
+});
+
+init();
+</script>
+</body>
+</html>
